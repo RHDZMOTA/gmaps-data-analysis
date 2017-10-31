@@ -9,7 +9,8 @@ DATA_FOLDER = os.environ.get("DATA_FOLDER")
 RAW_DATA = os.environ.get("RAW_DATA")
 MAPS_JSON_DATA = os.environ.get("MAPS_JSON_DATA")
 OUTPUT = os.environ.get("OUTPUT")
-MAPS_JSON_DATA = os.environ.get("MAPS_JSON_DATA")
+DATAPOINTS_TABLE = os.environ.get("DATAPOINTS_TABLE")
+TRIPS_TABLE = os.environ.get("TRIPS_TABLE")
 
 
 PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
@@ -28,6 +29,7 @@ class FilesConfig:
 
     class FileNames:
         gmaps_data = join(RAW_DATA_PATH, MAPS_JSON_DATA)
-        dataset = join(OUTPUT_PATH, "dataset.csv")
+        datapoints_csv = join(OUTPUT_PATH, DATAPOINTS_TABLE)
+        trips_csv = join(OUTPUT_PATH, TRIPS_TABLE)
 
 
