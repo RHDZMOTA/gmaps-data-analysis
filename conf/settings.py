@@ -11,7 +11,7 @@ MAPS_JSON_DATA = os.environ.get("MAPS_JSON_DATA")
 OUTPUT = os.environ.get("OUTPUT")
 DATAPOINTS_TABLE = os.environ.get("DATAPOINTS_TABLE")
 TRIPS_TABLE = os.environ.get("TRIPS_TABLE")
-
+SNAP_TO_ROAD_KEY = os.environ.get("SNAP_TO_ROAD_KEY")
 
 PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 
