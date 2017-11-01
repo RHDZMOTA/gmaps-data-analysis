@@ -10,6 +10,7 @@ from conf.settings import FilesConfig
 
 
 TRIP_DEFINITON = 7 * 60 * 1000
+TRIP_RELEVANCE = 2017 + 10/12
 SAVE = True
 
 
@@ -45,11 +46,15 @@ def create_trips(df, save=False):
         ids.append(trip)
         lats.append(trip_data.lat.values)
         lngs.append(trip_data.lng.values)
-        try:
-            temp = trip_enhancer.snap_road(pd.DataFrame({"lat": trip_data.lat.values, "lng": trip_data.lng.values}))
-            enhanced_lats.append(list(temp.lat.values))
-            enhanced_lngs.append(list(temp.lng.values))
-        except Exception as e:
+        if dt.datetime.fromtimestamp(temp_time).year + dt.datetime.fromtimestamp(temp_time).month > TRIP_RELEVANCE:
+            try:
+                temp = trip_enhancer.snap_road(pd.DataFrame({"lat": trip_data.lat.values, "lng": trip_data.lng.values}))
+                enhanced_lats.append(list(temp.lat.values))
+                enhanced_lngs.append(list(temp.lng.values))
+            except Exception as e:
+                enhanced_lats.append([])
+                enhanced_lngs.append([])
+        else:
             enhanced_lats.append([])
             enhanced_lngs.append([])
     trips["id"] = ids
