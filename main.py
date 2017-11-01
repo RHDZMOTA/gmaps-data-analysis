@@ -5,6 +5,7 @@ import datetime as dt
 
 from util.data_operations import get_dataset
 from util.distance_operations import harversine, distance_df
+from util.trip_enhancement import TripEnhancer, SNAP_TO_ROAD_KEY
 from conf.settings import FilesConfig
 
 
@@ -22,13 +23,14 @@ def create_table(save=False):
 
 
 def create_trips(df, save=False):
+    trip_enhancer = TripEnhancer(SNAP_TO_ROAD_KEY)
     driving_df = df.query("likely_activity == 'IN_VEHICLE'").copy()
     driving_df["delta_time"] = [0] + list(driving_df.timestamp.values[1:] - driving_df.timestamp.values[:-1])
     driving_df["trip_id"] = np.cumsum(driving_df.delta_time.values > TRIP_DEFINITON)
     trips = pd.DataFrame([], columns=["id", "distance", "time", "lat", "lng"])
     ids, distance, time, lats, lngs = [], [], [], [], []
-    initial_unix_time = []
-    initial_date_time = []
+    enhanced_lats, enhanced_lngs = [], []
+    initial_unix_time, initial_date_time = [], []
     deleted_trips = 0
     for trip in driving_df.trip_id.unique():
         trip_data = driving_df.query("trip_id == {}".format(trip))
@@ -43,13 +45,22 @@ def create_trips(df, save=False):
         ids.append(trip)
         lats.append(trip_data.lat.values)
         lngs.append(trip_data.lng.values)
+        try:
+            temp = trip_enhancer.snap_road(pd.DataFrame({"lat": trip_data.lat.values, "lng": trip_data.lng.values}))
+            enhanced_lats.append(list(temp.lat.values))
+            enhanced_lngs.append(list(temp.lng.values))
+        except Exception as e:
+            enhanced_lats.append([])
+            enhanced_lngs.append([])
     trips["id"] = ids
     trips["distance"] = distance
     trips["start_unix_time"] = initial_unix_time
     trips["start_date_time"] = initial_date_time 
     trips["time"] = time
     trips["lat"] = lats
+    trips["enhanced_lats"] = enhanced_lats
     trips["lng"] = lngs
+    trips["enhanced_lngs"] = enhanced_lngs
     trips["n_datapoints"] = trips.apply(lambda x: len(x["lat"]), 1).values
     if save:
         trips.to_csv(FilesConfig.FileNames.trips_csv, index=False)
@@ -59,6 +70,7 @@ def create_trips(df, save=False):
 def main():
     df = create_table(SAVE)
     trips = create_trips(df, SAVE)
+
 
 
 if __name__ == "__main__":
